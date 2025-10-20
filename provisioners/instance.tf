@@ -16,7 +16,8 @@ resource "aws_instance" "terraform" {
     }
 
     provisioner "local-exec" {
-        command = "echo instance is created"
+        #command = "echo instance is created",
+        command = "echo ip is ${self.public_ip}"
         on_failure = continue
         
     }
@@ -27,9 +28,29 @@ resource "aws_instance" "terraform" {
 
     }
 
-    
-  
+    provisioner "remote-exec" {
+    inline = [
+        "sudo apt-get update",
+        "sudo apt-get install -y nginx",
+        "sudo systemctl enable nginx",
+        "sudo systemctl start nginx",
+        ]
+      
+    }
+
+    provisioner "remote-exec" {
+
+        inline = [ 
+            "sudo systemctl stop nginx",
+            "echo 'successfully stopped nginx'"
+          
+        ]
+        when = destroy
+      
+    }
 }
+
+    
 
 resource "aws_security_group" "securitygroup" {
     name = "allowa-ll"
